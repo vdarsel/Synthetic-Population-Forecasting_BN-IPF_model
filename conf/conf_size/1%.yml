@@ -1,0 +1,28 @@
+filename_training: "training_dataset_Individual_1.csv"
+filename_test: "testing_dataset_Individual_1.csv"
+filename_test_WDCR: "testing_dataset_Individual_1_equal_size_training.csv"
+
+folder_save_end: "1%"
+
+##########################
+### Data preprocessing ###
+##########################
+
+transform:
+  num_normalization: "quantile"   # possible values "quantile", "standard", "minmax"
+  num_nan_policy: 'mean'
+  cat_nan_policy: 'drop-rows'
+  cat_encoding : null
+  cat_min_frequency : null
+  cat_min_count : 10
+  cat_too_small_policy: "cut"
+
+transform_statistical:
+  bins_num: 25
+
+###############################################
+############ Generation parameters ############
+###############################################
+
+batch_size_generation: 1024
+n_generation: 102400

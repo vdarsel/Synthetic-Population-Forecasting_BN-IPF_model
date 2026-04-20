@@ -1,0 +1,11 @@
+gpu: 0
+datapath: "Data/"
+dataname: "Census_data_XXXX"
+filename_test: "prepared_data_10%_test.csv"
+infoname: "info.csv"
+sample_folder: "Results/Generated_data/5_variables"
+sampling_terminaison: "_5_variables_sample"
+
+folder_save_start: "Census_TTTT_5_variables_"
+
+attributes_setname: "5_variables"  #possible values 5_variables 7_variables 9_variables 11_variables
