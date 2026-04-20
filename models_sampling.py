@@ -10,7 +10,7 @@ from Models.Projective_Iterative_Proportionnal_Fitting import update_population_
 
 import pandas as pd
 
-def projection_process(args):
+def projection_generation(args):
     if args.encoding == "tanh":
         encoding_coefficient = encoding_coefficient_tanh
         decoding_coefficient = decoding_coefficient_tanh

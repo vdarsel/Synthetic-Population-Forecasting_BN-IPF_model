@@ -1,12 +1,12 @@
-import os
 import argparse
 import yaml
 
 from conf_fctn import odict,dict2namespace
 
 
-from models_sampling import projection_process
+from models_sampling import projection_generation
 
+from Evaluation.evaluation_generated_data import evaluation
 # from evaluation.evaluation_from_parameters import full_evaluation
 # from evaluation.scores_comparison import scores_comparison
 
@@ -61,6 +61,7 @@ if __name__ == '__main__':
     setattr(config,"folder_save",config.folder_save_start+config.folder_save_end)
     setattr(config, "size_data_str", str_float)
 
+
     if((not args.BN) and (args.IPF_pre)):
         args.IPF_pre = False
         
@@ -79,8 +80,21 @@ if __name__ == '__main__':
     print("  +  ".join(models_name))
     
     print("********************************************\n\n\n")
+    
+    print("____________________________")
+    print("Generation of the population")
+    print("____________________________")
+    print("\n\n")
 
-    projection_process(config)
+    projection_generation(config)
+    
+    print("\n\n")
+    print("____________________________")
+    print(" Evaluation of the population")
+    print("____________________________")
+    print("\n\n")
+    
+    evaluation(config)
     
 
 
