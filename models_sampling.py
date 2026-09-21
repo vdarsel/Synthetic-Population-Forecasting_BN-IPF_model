@@ -2,15 +2,22 @@ import os
 import numpy as np
 from utils.data import load_data, load_info
 
-from Models.encoding import encoding_coefficient_log, encoding_coefficient_no_embedding, encoding_coefficient_tanh
-from Models.encoding import decoding_coefficient_log, decoding_coefficient_no_embedding, decoding_coefficient_tanh
+from utils.name_experience import get_term
 
-from Models.Projected_Bayesian_Network_hill_climbing import synthetic_population_from_projected_BN_hill
-from Models.Projective_Iterative_Proportionnal_Fitting import update_population_with_projective_IPF
+from Models.encoding import encoding_coefficient_log, encoding_coefficient_no_embedding, encoding_coefficient_tanh, encoding_coefficient_log_ratio
+from Models.encoding import decoding_coefficient_log, decoding_coefficient_no_embedding, decoding_coefficient_tanh, decoding_coefficient_log_ratio
+
+from Models.Static_Methods.Static_Bayesian_Network_hill_climbing import synthetic_population_from_static_BN_hill
+from Models.Projection_Models.Projected_Bayesian_Network_hill_climbing import synthetic_population_from_projected_BN_hill
+from Models.Projection_Models.Projected_Iterative_Proportionnal_Fitting import update_population_with_projective_IPF
+
+from Models.Resampling_Projection.Fitting_on_individual_distribution import resampling_from_true_marginal_distribution
+from Models.Resampling_Projection.Fitting_on_joint_distribution import resampling_from_true_joint_distribution
 
 import pandas as pd
 
 def projection_generation(args):
+    
     if args.encoding == "tanh":
         encoding_coefficient = encoding_coefficient_tanh
         decoding_coefficient = decoding_coefficient_tanh
@@ -20,17 +27,13 @@ def projection_generation(args):
     elif args.encoding == "log":
         encoding_coefficient = encoding_coefficient_log
         decoding_coefficient = decoding_coefficient_log
+    elif args.encoding == "log_ratio":
+        encoding_coefficient = encoding_coefficient_log_ratio
+        decoding_coefficient = decoding_coefficient_log_ratio
     else:
         raise ValueError(f"Unknown encoding: {args.encoding}")
     
-    term="_Projection"
-    if args.IPF_pre:
-        term+="_IPF"
-    if args.BN:
-        term+="_Bayesian_Network_Hill_Climb"
-    if args.IPF_post:
-        term+="_IPF"
-    
+    term= get_term(args)
     
     year_prediction = args.year_prediction
     
@@ -39,10 +42,7 @@ def projection_generation(args):
     years_training_validation  = np.arange(year_validation-args.n_years-args.time_horizon+1,year_validation-args.time_horizon+1, dtype=int)
     
     x_training_values = np.arange(-args.n_years-args.time_horizon+1,-args.time_horizon+1)
-    x_target = 0
-    
-    term+=f"_{args.encoding}_from_{years_training_validation[0]}_Validation_{year_validation}"
-    
+    x_target = 0    
     
     
     datapath = args.datapath
@@ -126,6 +126,12 @@ def projection_generation(args):
                           folder_sampling, n_sample,
                           dict_unique_concat)
         print("End step\n")
+
+    elif args.static_BN:
+        print("\n\nStatic BN...")
+        synthetic_population = synthetic_population_from_static_BN_hill(training_data[-1],
+                          folder_sampling, n_sample)
+        print("End step\n")
     else:
         synthetic_population = data_validation.copy()
         
@@ -139,6 +145,14 @@ def projection_generation(args):
                                                       dict_unique_concat, info, n_sample)[0]
     
         print("End step\n")
+        
+    if args.Resampling_marginal:
+        reference_data = load_data(dataname_prediction, datapath, filename_test, variables, dtype_dict)
+        synthetic_population = resampling_from_true_marginal_distribution(synthetic_population.astype(str), reference_data.astype(str), info, dict_unique_concat, n_sample)
+    elif args.Resampling_joint:
+        reference_data = load_data(dataname_prediction, datapath, filename_test, variables, dtype_dict)
+        synthetic_population = resampling_from_true_joint_distribution(synthetic_population.astype(str), reference_data.astype(str), info, dict_unique_concat, n_sample)
+    
     print("Saving population...")
     synthetic_population.to_csv(sampling_file, sep=";", index=False)
     print("Population saved")

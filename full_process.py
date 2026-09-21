@@ -30,9 +30,14 @@ if __name__ == '__main__':
     parser.add_argument('--n_min', type=int, required=False, default=0)
     parser.add_argument('--n_max', type=int, required=False, default=1)
 
-    parser.add_argument("--IPF_pre", action='store_true')
-    parser.add_argument("--BN", action='store_true')
-    parser.add_argument("--IPF_post", action='store_true')
+    parser.add_argument("--TPIPF_pre", action='store_true')
+    parser.add_argument("--TPBN", action='store_true')
+    parser.add_argument("--static_BN", action='store_true')
+    
+    
+    parser.add_argument("--TPIPF_post", action='store_true')
+    parser.add_argument("--Resampling_marginal", action='store_true')
+    parser.add_argument("--Resampling_joint", action='store_true')
     
 
     args = odict(vars(parser.parse_args()))
@@ -62,25 +67,45 @@ if __name__ == '__main__':
     setattr(config, "size_data_str", str_float)
 
 
-    if((not args.BN) and (args.IPF_pre)):
-        args.IPF_pre = False
+    if((not args.BN) and (args.TPIPF_pre)):
+        args.TPIPF_pre = False
+        
+    valid_method_static_projection = True
+    valid_method_resampling = True
         
     print("\n\n\n***************** Model ********************")
     models_name = []
     
-    if args.IPF_pre:
+    if args.TPIPF_pre:
+        valid_method_resampling = False
         models_name.append("IPF prefitting (new marginals on training data)")
     
     if args.BN:
+        valid_method_resampling = False
         models_name.append("BN (projection of CPTs)")
+    
+    if args.static_BN:
+        models_name.append("Static BN (no projection)")
 
-    if args.IPF_post:
+    if args.TPIPF_post:
+        valid_method_resampling = False
         models_name.append("IPF postfitting (new marginals on generated data)")
+        
+    if args.Resampling_marginal:
+        valid_method_static_projection = False
+        models_name.append("Resampling on true marginals")
+        
+    elif args.Resampling_joint:
+        valid_method_static_projection = False
+        models_name.append("Resampling on true joint distribution (Age, Sex, Location)")
 
     print("  +  ".join(models_name))
     
     print("********************************************\n\n\n")
     
+    if not (valid_method_static_projection|valid_method_resampling):
+        raise NotImplementedError("The methods are not compatible")
+
     print("____________________________")
     print("Generation of the population")
     print("____________________________")
@@ -95,8 +120,3 @@ if __name__ == '__main__':
     print("\n\n")
     
     evaluation(config)
-    
-
-
-
-    
