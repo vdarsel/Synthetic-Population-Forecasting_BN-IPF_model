@@ -1,7 +1,6 @@
 gpu: 0
 datapath: "Data/"
 dataname: "Census_data_XXXX"
-filename_test: "prepared_data_10%_test.csv"
 infoname: "info.csv"
 sample_folder: "Results/Generated_data/9_variables"
 sampling_terminaison: "_9_variables_sample"
