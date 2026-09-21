@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 import os
 from itertools import combinations
-
+from tqdm import tqdm
+from math import comb
 
 def compute_proportion_file_from_unique_array_and_df(
     dict_unique_values,
@@ -25,7 +26,11 @@ def compute_proportion_file_from_unique_array_and_df(
     values = []
     freq_list = []
     combis_list = []
-    for combination in combis:
+    
+    pbar = tqdm(combis, total=comb(len(columns), n_attributes))
+    pbar.set_description("Computing proportions")
+    
+    for combination in pbar:
         cols = columns[np.array(combination)]
         freq_serie = pd.Series(0.0, index = pd.MultiIndex.from_product(
             [dict_unique_values[col] for col in cols]

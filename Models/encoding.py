@@ -18,8 +18,8 @@ def decoding_coefficient_tanh(coefficients, reference_coefficients):
     cpd_values_shape = reference_coefficients.shape
     coefs_before_transformation = coefficients.reshape(cpd_values_shape)
     
-    coefs_before_transformation = np.min([np.ones_like(coefs_before_transformation), coefs_before_transformation],0)
-    coefs_before_transformation = np.max([-np.ones_like(coefs_before_transformation), coefs_before_transformation],0)
+    coefs_before_transformation = np.minimum(coefs_before_transformation, 1)
+    coefs_before_transformation = np.maximum(coefs_before_transformation, -1)
     
     coefs_before_softmax = reference_coefficients+np.tanh(coefs_before_transformation)
     
@@ -34,8 +34,8 @@ def decoding_coefficient_no_embedding(coefficients, reference_coefficients):
     cpd_values_shape = reference_coefficients.shape
     coefs = coefficients.reshape(cpd_values_shape)
     
-    coefs = np.min([np.ones_like(coefs), coefs],0)
-    coefs = np.max([np.zeros_like(coefs), coefs],0)
+    coefs = np.minimum(coefs, 1)
+    coefs = np.maximum(coefs, 0)
 
     return normalize(coefs)
 
@@ -57,3 +57,41 @@ def decoding_coefficient_log(coefficients, reference_coefficients):
     coefs = np.exp(coefs)
             
     return normalize(coefs)
+
+
+def encoding_coefficient_log_ratio(coefficients, reference_coefficients):
+    dim = len(coefficients[0].shape)
+    res = []
+    if dim>1:
+        reference_coefficients = reference_coefficients.reshape(coefficients[0].shape[0],-1)
+    
+    arg_max = np.argmax(reference_coefficients,0, keepdims=True)
+    
+    res = []
+    
+    for coefs in coefficients:
+        if dim>1:
+            coefs = coefs.reshape(coefs.shape[0],-1)
+        
+        maxvals = np.take_along_axis(coefs, arg_max, 0)
+        
+        coefs = np.maximum(coefs, 1e-15)
+        maxvals = np.maximum(maxvals, 1e-15)
+        
+        res.append((np.log(coefs) - np.log(maxvals)).reshape(-1))
+
+    return np.array(res)
+
+
+def decoding_coefficient_log_ratio(coefficients, reference_coefficients):
+    assert len(coefficients) == np.prod(reference_coefficients.shape)
+    
+    # print(coefficients)
+    cpd_values_shape = reference_coefficients.shape
+    coefs = coefficients.reshape(cpd_values_shape)
+
+    coefs = np.exp(coefs)
+    
+    coefs =  normalize(coefs)
+    # print(coefs)
+    return coefs

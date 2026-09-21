@@ -10,6 +10,8 @@ from Evaluation.metrics_originality import get_proportion_from_original_data_df,
 from Evaluation.metrics_privacy import Distance_to_Closest_Records,generate_histogram_DCR
 import plotly.graph_objects as go
 
+from utils.name_experience import get_term
+
 CAT_RARE_VALUE = '__rare__'
 
 def preprocessing_cat_data_dataframe_sampling(dataset_ref: pd.DataFrame, min_count, cols_cat, other_dataset : list[pd.DataFrame] = []):
@@ -104,14 +106,14 @@ def output_serie_eval(dict_unique_values, basename_file_save, proportion_test_fi
     
     for i in range(1,4):    
         proportion_file = f"{basename_file_save}_{i}.npy"
-        if (not os.path.isfile(proportion_file)):
-            print("\nGenerate Proportion file for sample")
-            compute_proportion_file_from_unique_array_and_df(dict_unique_values,
-                    df_for_evaluation.astype(str),
-                    columns,
-                    basename_file_save,
-                    i,
-                    ".")
+        # if (not os.path.isfile(proportion_file)):
+        print("\nGenerate Proportion file for sample")
+        compute_proportion_file_from_unique_array_and_df(dict_unique_values,
+                df_for_evaluation.astype(str),
+                columns,
+                basename_file_save,
+                i,
+                ".")
         combi_test_file = f"{proportion_test_file}_{i}_comb.npy"
         value_test_file = f"{proportion_test_file}_{i}_values.npy"
 
@@ -132,7 +134,7 @@ def output_serie_eval(dict_unique_values, basename_file_save, proportion_test_fi
             df_scores_by_cat.to_csv(f"{dir_path_save_results}/scores_by_cat_{i}.csv", sep=";")    
             generate_histogram(df_scores_by_cat, dir_path_save_results, i)
             generate_plot(proportion, proportion_test, dir_path_save_results, i)
-            generate_plot_plotly(proportion_concat, proportion_test_concat, combi_names_concat, values_test_concat, dir_path_save_results, i)
+            # generate_plot_plotly(proportion_concat, proportion_test_concat, combi_names_concat, values_test_concat, dir_path_save_results, i)
         df_scores_median.loc[dict_title[i]] =  df_scores_by_cat[["SRMSE","Hellinger","Pearson","R2"]].median()
         df_scores_mean.loc[dict_title[i]] = df_scores_by_cat[["SRMSE","Hellinger","Pearson","R2"]].mean()
         df_scores_agg.loc[dict_title[i]] = pd.Series(get_scores_agg(proportion_test,proportion),index=["SRMSE","Hellinger","Pearson","R2"])
@@ -202,13 +204,7 @@ def output_serie_eval(dict_unique_values, basename_file_save, proportion_test_fi
 
 
 def evaluation(args, term_0=""):
-    term=term_0+"_Projection"
-    if args.IPF_pre:
-        term+="_IPF"
-    if args.BN:
-        term+="_Bayesian_Network_Hill_Climb"
-    if args.IPF_post:
-        term+="_IPF"
+    term= get_term(args)    
 
     if not ("special_model" in args.__dict__.keys()):
         args.special_model= ""
@@ -223,14 +219,14 @@ def evaluation(args, term_0=""):
     year_prediction = args.year_prediction
     year_validation = year_prediction-args.time_horizon
     
-    term+=f"_{args.encoding}_from_{year_validation-args.n_years-args.time_horizon+1}_Validation_{year_validation}"
-
     dataname_test = dataname_base.replace("XXXX",str(year_prediction))
     dataname_reference = dataname_base.replace("XXXX",str(year_validation))
 
     info_path = f'{datapath}/{infoname}'
     filename_test = args.filename_test
     file_test = f'{datapath}/{dataname_test}/{filename_test}'
+    filename_test_WCTR = args.filename_test_WDCR
+    file_test_WCTR = f'{datapath}/{dataname_test}/{filename_test_WCTR}'
         
     filename_sampling = (args.sampling_terminaison+"_"+str(n_sample)+term+".").join(args.filename_training.split('.'))
     folder_sampling = f'{sample_folder}/{args.size_data_str}/{args.folder_save.replace("TTTT",str(args.year_prediction))+term}'
@@ -264,7 +260,7 @@ def evaluation(args, term_0=""):
         return data  
 
     dataset_reference = load_data(file_reference, df_info)
-    df_testing_equalsize = load_data(file_test.replace(".csv",'_equal_size_training.csv'), df_info)
+    df_testing_equalsize = load_data(file_test_WCTR, df_info)
     df_sample = load_data(f'{basename}.csv', df_info)
     dataset_test = load_data(file_test, df_info)
     
@@ -272,7 +268,7 @@ def evaluation(args, term_0=""):
         
     dict_unique_values = {}
     for col in columns:
-        unique_values = np.load(f"../../Results/Projection_References/Unique_Values_Rescencement_Projection_2007_2021/unique_values_{col}.npy", allow_pickle=True).astype(str)
+        unique_values = np.load(f"Results/Projection_References/Unique_Values_Rescencement_Projection_2007_2021/unique_values_{col}.npy", allow_pickle=True).astype(str)
         dict_unique_values[col] = np.sort(unique_values)
 
 

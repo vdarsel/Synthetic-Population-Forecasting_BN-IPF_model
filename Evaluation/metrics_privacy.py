@@ -11,8 +11,8 @@ def generate_histogram_DCR(df, path):
         quantile = df[set].quantile(0.99)  #avoid long tail
         values = df[set][df[set]<=quantile]
         if ((values.max()-values.min())<(np.quantile(df.to_numpy(),0.99)-np.quantile(df.to_numpy(),0.01))*0.3): #avoid invisible plot
-            id_min = np.arange(len(df))[df[set]==df[set].min()]
-            id_max = np.arange(len(df))[df[set]==df[set].max()]
+            id_min = np.arange(len(values))[values==values.min()]
+            id_max = np.arange(len(values))[values==values.max()]
             values.iloc[id_min[0]] = np.quantile(df.to_numpy(),0.01)
             values.iloc[id_max[-1]] = np.quantile(df.to_numpy(),0.99)
         plt.hist(values,100,label=set)
