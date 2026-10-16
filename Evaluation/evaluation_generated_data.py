@@ -6,7 +6,7 @@ from Evaluation.proportion_sampling import compute_proportion_file_from_unique_a
 from Evaluation.metrics_proportion import get_df_scores_by_cat, get_scores_agg
 from Evaluation.heatmap import generate_color_map_save, generate_color_map_filter_save
 import matplotlib.pyplot as plt
-from Evaluation.metrics_originality import get_proportion_from_original_data_df, get_proportion_from_original_data_df_not_in_other_df, get_rate_of_impossible_combinations
+from Evaluation.metrics_originality import get_proportion_from_original_data_df, get_proportion_from_original_data_df_not_in_other_df, get_rate_of_impossible_combinations, get_proprotion_retrieved_samples
 from Evaluation.metrics_privacy import Distance_to_Closest_Records,generate_histogram_DCR
 import plotly.graph_objects as go
 
@@ -91,6 +91,7 @@ def output_serie_eval(dict_unique_values, basename_file_save, proportion_test_fi
                      "R2 marginal (global)","R2 bivariate (global)","R2 trivariate (global)",
                      "Rate of copies (training, with geo)", "Rate of copies (training, without geo)",
                      "Rate of copies (testing not training, with geo)", "Rate of copies (testing not training, without geo)",
+                     "Rate of sampling zero missed in testing (testing not training, with geo)", "Rate of sampling zero missed in testing (testing not training, without geo)",
                      "Rate of undesired couples (with geo)", "Rate of undesired couples (without geo)"
                      ], dtype=str)
 
@@ -198,6 +199,21 @@ def output_serie_eval(dict_unique_values, basename_file_save, proportion_test_fi
         Ser_review["Rate of copies (testing not training, without geo)"] = 'NA'
     else:
         Ser_review["Rate of copies (testing not training, without geo)"] = f'{val:.2%}'
+    
+    val = get_proprotion_retrieved_samples(dataset_test_df, dataset_reference_training, df_for_evaluation, columns)
+    
+    if val=="NA":
+        Ser_review["Rate of sampling zero missed in testing (testing not training, with geo)"] = val
+    else:
+        Ser_review["Rate of sampling zero missed in testing (testing not training, with geo)"] = 1-val
+    
+    val = get_proprotion_retrieved_samples(dataset_test_df, dataset_reference_training, df_for_evaluation, columns_without_geo)              
+    
+    if val=="NA":
+        Ser_review["Rate of sampling zero missed in testing (testing not training, without geo)"] = -1
+    else:    
+        Ser_review["Rate of sampling zero missed in testing (testing not training, without geo)"] = 1 - val
+    
     Ser_review["Wasserstein-DCR"] = Wasserstein_distance_DCR
     
     return Ser_review
