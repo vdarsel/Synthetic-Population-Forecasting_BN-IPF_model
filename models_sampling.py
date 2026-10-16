@@ -103,7 +103,7 @@ def projection_generation(args):
         
     print("Done")
 
-    if args.IPF_pre:
+    if args.TPIPF_pre:
         print("\n\nIPF premodel...")
         datas = training_data+training_data_validation
         datas = update_population_with_projective_IPF(datas, training_data,
@@ -115,7 +115,7 @@ def projection_generation(args):
         training_data = datas[:len(training_data)]
         training_data_validation = datas[len(training_data):]
         print("End step\n")
-    if args.BN:
+    if args.TPBN:
         print("\n\nProjected BN...")
         synthetic_population = synthetic_population_from_projected_BN_hill(training_data, training_data_validation,
                           data_validation, n_alphas,
@@ -135,7 +135,7 @@ def projection_generation(args):
     else:
         synthetic_population = data_validation.copy()
         
-    if args.IPF_post:
+    if args.TPIPF_post:
         print("\n\nIPF postsampling...")
         synthetic_population = update_population_with_projective_IPF([synthetic_population], training_data,
                                                       training_data_validation, data_validation,
