@@ -70,7 +70,7 @@ def update_population_with_projective_IPF(populations_to_update,
     
     print("Performing IPF...")
     for population in populations_to_update:
-        res.append(perform_IPF(population,dict_unique, dict_proportion_projection, info, n_sample))
+        res.append(perform_IPF(population,dict_unique, dict_proportion_projection, info, n_sample).reset_index())
     print("IPF done")
     
     return res
