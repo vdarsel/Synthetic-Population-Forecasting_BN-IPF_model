@@ -7,14 +7,14 @@ n_max_default = 1
 
 def get_term(args):
     term="_Projection"
-    if args.IPF_pre:
-        term+="_IPF"
-    if args.BN:
-        term+="_Bayesian_Network_Hill_Climb"
+    if args.TPIPF_pre:
+        term+="_TPIPF"
+    if args.TPBN:
+        term+="_TPBN_Hill_Climb"
     if args.static_BN:
-        term+="_Static_Bayesian_Network_Hill_Climb"
-    if args.IPF_post:
-        term+="_IPF"
+        term+="_Static_BN_Hill_Climb"
+    if args.TPIPF_post:
+        term+="_TPIPF"
     if args.Resampling_marginal:
         term+="_Resampling_marginal"
     if args.Resampling_joint:
